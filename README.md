@@ -3,7 +3,7 @@
 Minimal reproducer: NVSHMEM 3.3.24 aborts during `nvshmem_init()` when the
 current CUDA context is anything other than the device's primary context.
 
-No MPS, no HEL, no IB — just `cuCtxCreate` + `nvshmem_init`.
+Just `cuCtxCreate` + `nvshmem_init` — no extra runtime or library required.
 
 ## Build and run
 
@@ -58,9 +58,9 @@ Only material difference between the two: which CUDA context is current at
 
 ## Implication
 
-Any stack that manages its own CUDA contexts (e.g. HEL's service context for
-MPS SM partitioning) cannot call device-side NVSHMEM APIs from those
-contexts. NVSHMEM calls have to stay in the primary context.
+Any stack that manages its own CUDA contexts (anything using `cuCtxCreate`
+instead of the default primary) cannot call device-side NVSHMEM APIs from
+those contexts. NVSHMEM calls have to stay in the primary context.
 
 To file upstream: the sources here are a complete repro — attach `smoke_ctx.cu`,
 `build_ctx.sh`, `run_ctx.sh` to an issue at https://github.com/NVIDIA/nvshmem/issues.
